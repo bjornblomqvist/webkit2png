@@ -38,7 +38,10 @@ except ImportError:
   print "Cannot find pyobjc library files.  Are you sure it is installed?"
   sys.exit() 
 
-
+try:
+  import xattr
+except ImportError:
+  print "xattr not found. Will not write source URL."
 
 class AppDelegate (Foundation.NSObject):
     # what happens when the app starts up
@@ -85,10 +88,11 @@ class WebkitLoad (Foundation.NSObject, WebKit.protocols.WebFrameLoadDelegate):
        dir = os.path.abspath(os.path.expanduser(options.dir))
        return os.path.join(dir,filename)
 
-    def saveImages(self,bitmapdata,filename,options):
+    def saveImages(self,bitmapdata,filename,options,URL):
         # save the fullsize png
         if options.fullsize:
             bitmapdata.representationUsingType_properties_(AppKit.NSPNGFileType,None).writeToFile_atomically_(filename + "-full.png",objc.YES)
+            self.writeSource(filename + "-full.png", URL)
 
         if options.thumb or options.clipped:
             # work out how big the thumbnail is
@@ -117,10 +121,17 @@ class WebkitLoad (Foundation.NSObject, WebKit.protocols.WebFrameLoadDelegate):
                 thumbOutput.representationUsingType_properties_(
                         AppKit.NSPNGFileType,None
                     ).writeToFile_atomically_(filename + "-thumb.png",objc.YES)
+                self.writeSource(filename + "-thumb.png", URL)
             if options.clipped:
                 clipOutput.representationUsingType_properties_(
                         AppKit.NSPNGFileType,None
                     ).writeToFile_atomically_(filename + "-clipped.png",objc.YES)
+                self.writeSource(filename + "-clipped.png", URL)
+
+    def writeSource(self,filemame, url):
+        if globals().get('xattr', False):
+            xattr.setxattr(filemame, "com.apple.metadata:kMDItemWhereFroms", url)
+            
 
     def getURL(self,webview):
         if self.urls:
@@ -171,7 +182,7 @@ class WebkitLoad (Foundation.NSObject, WebKit.protocols.WebFrameLoadDelegate):
             filename = self.makeFilename(URL, self.options) 
 
             bitmapdata = self.captureView(view)  
-            self.saveImages(bitmapdata,filename,self.options)
+            self.saveImages(bitmapdata,filename,self.options,URL)
 
             print " ... done"
             self.getURL(webview)
