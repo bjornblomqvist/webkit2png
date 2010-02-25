@@ -52,6 +52,7 @@ class AppDelegate (Foundation.NSObject):
         NSApplication.sharedApplication().terminate_(None)
 
 class WebkitLoad (Foundation.NSObject, WebKit.protocols.WebFrameLoadDelegate):
+    xpathRect = None
 
     # what happens if something goes wrong while loading
     def webView_didFailLoadWithError_forFrame_(self,webview,error,frame):
@@ -150,11 +151,11 @@ class WebkitLoad (Foundation.NSObject, WebKit.protocols.WebFrameLoadDelegate):
 
     def captureView(self,view):
         bounds = view.bounds()
-        if(type(self.options.rect) != WebKit.WebUndefined):
-          bounds.origin.x = self.options.rect[0]
-          bounds.origin.y = self.options.rect[1];
-          bounds.size.width = self.options.rect[2];
-          bounds.size.height = self.options.rect[3];
+        if(self.xpathRect and type(self.xpathRect) != WebKit.WebUndefined):
+          bounds.origin.x = self.xpathRect[0]
+          bounds.origin.y = self.xpathRect[1];
+          bounds.size.width = self.xpathRect[2];
+          bounds.size.height = self.xpathRect[3];
         view.lockFocus()
         bitmapdata = AppKit.NSBitmapImageRep.alloc()
         bitmapdata.initWithFocusedViewRect_(bounds)
@@ -244,7 +245,7 @@ function $X (exp, context, type /* want type */) {
 }
 })()
 """ % self.options.xpath);
-            self.options.rect = rect;
+            self.xpathRect = rect;
           Foundation.NSTimer.scheduledTimerWithTimeInterval_target_selector_userInfo_repeats_( self.options.delay, self, self.doGrab, webview, False)
 
     def doGrab(self,timer):
