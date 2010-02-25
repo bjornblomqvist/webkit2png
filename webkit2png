@@ -150,11 +150,11 @@ class WebkitLoad (Foundation.NSObject, WebKit.protocols.WebFrameLoadDelegate):
 
     def captureView(self,view):
         bounds = view.bounds()
-        if(self.options.xpath != ""):
-          bounds.origin.x = self.options.elementx;
-          bounds.origin.y = self.options.elementy;
-          bounds.size.width = self.options.elementwidth;
-          bounds.size.height = self.options.elementheight;
+        if(self.options.rect):
+          bounds.origin.x = self.options.rect[0]
+          bounds.origin.y = self.options.rect[1];
+          bounds.size.width = self.options.rect[2];
+          bounds.size.height = self.options.rect[3];
         view.lockFocus()
         bitmapdata = AppKit.NSBitmapImageRep.alloc()
         bitmapdata.initWithFocusedViewRect_(bounds)
@@ -170,7 +170,12 @@ class WebkitLoad (Foundation.NSObject, WebKit.protocols.WebFrameLoadDelegate):
             rect = wso.evaluateWebScript_("""(function() {
 var e = $X('%s')[0];
 
-return [left(e), top(e), e.clientWidth, e.clientHeight]
+return e ? [
+  left(e),
+  top(e),
+  e.clientWidth,
+  e.clientHeight
+] : false;
 
 function top(obj) {
   var pos = 0;
@@ -239,10 +244,7 @@ function $X (exp, context, type /* want type */) {
 }
 })()
 """ % self.options.xpath);
-            self.options.elementx = rect[0];
-            self.options.elementy = rect[1];
-            self.options.elementwidth = rect[2];
-            self.options.elementheight = rect[3];
+            self.options.rect = rect;
           Foundation.NSTimer.scheduledTimerWithTimeInterval_target_selector_userInfo_repeats_( self.options.delay, self, self.doGrab, webview, False)
 
     def doGrab(self,timer):
