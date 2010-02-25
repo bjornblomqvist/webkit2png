@@ -150,7 +150,7 @@ class WebkitLoad (Foundation.NSObject, WebKit.protocols.WebFrameLoadDelegate):
 
     def captureView(self,view):
         bounds = view.bounds()
-        if(self.options.rect):
+        if(type(self.options.rect) != WebKit.WebUndefined):
           bounds.origin.x = self.options.rect[0]
           bounds.origin.y = self.options.rect[1];
           bounds.size.width = self.options.rect[2];
