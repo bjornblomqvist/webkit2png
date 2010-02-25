@@ -170,34 +170,25 @@ class WebkitLoad (Foundation.NSObject, WebKit.protocols.WebFrameLoadDelegate):
             wso = webview.windowScriptObject();
             rect = wso.evaluateWebScript_("""(function() {
 var e = $X('%s')[0];
-
-return e ? [
-  left(e),
-  top(e),
-  e.clientWidth,
-  e.clientHeight
-] : false;
-
-function top(obj) {
-  var pos = 0;
-  if (obj) {
-    pos = obj.offsetTop;
-    if (obj.offsetParent) {
-      pos += top(obj.offsetParent);
-    }
-  }
-  return pos;
+if(e) {
+  var position = getElementPosition(e);
+  return [
+    position.left,
+    position.top,
+    e.clientWidth,
+    e.clientHeight
+  ];
+} else {
+  return false;
 }
 
-function left(obj) {
-  var pos = 0;
-  if (obj) {
-    pos = obj.offsetLeft;
-    if (obj.offsetParent) {
-      pos += top(obj.offsetParent);
-    }
+// http://d.hatena.ne.jp/javascripter/20080531/1212264942
+function getElementPosition(elem){
+  var position=elem.getBoundingClientRect();
+  return {
+    left:Math.round(window.scrollX+position.left),
+    top:Math.round(window.scrollY+position.top)
   }
-  return pos;
 }
 
 // extend version of $X
