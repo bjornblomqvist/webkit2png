@@ -151,7 +151,7 @@ class WebkitLoad (Foundation.NSObject, WebKit.protocols.WebFrameLoadDelegate):
 
     def captureView(self,view):
         bounds = view.bounds()
-        if(self.xpathRect and type(self.xpathRect) != WebKit.WebUndefined):
+        if(self.xpathRect):
           bounds.origin.x = self.xpathRect[0]
           bounds.origin.y = self.xpathRect[1];
           bounds.size.width = self.xpathRect[2];
@@ -245,7 +245,8 @@ function $X (exp, context, type /* want type */) {
 }
 })()
 """ % self.options.xpath);
-            self.xpathRect = rect;
+            if(type(rect) != WebKit.WebUndefined):
+              self.xpathRect = rect;
           Foundation.NSTimer.scheduledTimerWithTimeInterval_target_selector_userInfo_repeats_( self.options.delay, self, self.doGrab, webview, False)
 
     def doGrab(self,timer):
