@@ -191,6 +191,7 @@ function getElementPosition(elem){
   }
 }
 
+// http://gist.github.com/3238
 // extend version of $X
 // $X(exp);
 // $X(exp, context);
