@@ -300,7 +300,7 @@ examples:
     cmdparser.add_option("-D", "--dir",type="string",default="./",
        help="directory to place images into")
     cmdparser.add_option("-X", "--xpath",type="string",default="",
-       help="xpath for elemnt to be captured")
+       help="xpath for node to be captured")
     cmdparser.add_option("--delay",type="float",default=0,
        help="delay between page load finishing and screenshot")
     cmdparser.add_option("--noimages", action="store_true",
