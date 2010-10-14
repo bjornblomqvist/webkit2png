@@ -151,7 +151,7 @@ class WebkitLoad (Foundation.NSObject, WebKit.protocols.WebFrameLoadDelegate):
 
     def captureView(self,view):
         bounds = view.bounds()
-        if(self.xpathRect):
+        if self.xpathRect and self.xpathRect[2] > 0 and self.xpathRect[3] > 0:
           bounds.origin.x = self.xpathRect[0]
           bounds.origin.y = self.xpathRect[1];
           bounds.size.width = self.xpathRect[2];
