@@ -51,7 +51,10 @@ class WebkitLoad (Foundation.NSObject, WebKit.protocols.WebFrameLoadDelegate):
     def webView_didFailLoadWithError_forFrame_(self,webview,error,frame):
         print " ... something went wrong: " + error.localizedDescription()
     def webView_didFailProvisionalLoadWithError_forFrame_(self,webview,error,frame):
-        print " ... something went wrong: " + error.localizedDescription()
+        # Hacky fix for noncritical error -999, which shouldn't cause a failure
+        if error.code() != -999:
+            print " ... something went wrong: "+error.localizedDescription()
+            self.getURL(webview)
 
     # make the filename
     def makeFilename(self,URL,options):
