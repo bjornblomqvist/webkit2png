@@ -149,10 +149,15 @@ class WebkitLoad (Foundation.NSObject, WebKit.protocols.WebFrameLoadDelegate):
           bounds.origin.y = self.xpathRect[1];
           bounds.size.width = self.xpathRect[2];
           bounds.size.height = self.xpathRect[3];
-        view.lockFocus()
-        bitmapdata = AppKit.NSBitmapImageRep.alloc()
-        bitmapdata.initWithFocusedViewRect_(bounds)
-        view.unlockFocus()
+        if hasattr(view, "bitmapImageRepForCachingDisplayInRect_"):
+            bitmapdata = view.bitmapImageRepForCachingDisplayInRect_(view.bounds())
+            view.cacheDisplayInRect_toBitmapImageRep_(view.bounds(), bitmapdata)
+        else:
+            view.lockFocus()
+            bitmapdata = AppKit.NSBitmapImageRep.alloc()
+            bitmapdata.initWithFocusedViewRect_(view.bounds())
+            view.unlockFocus()
+
         return bitmapdata
  
     # what happens when the page has finished loading
