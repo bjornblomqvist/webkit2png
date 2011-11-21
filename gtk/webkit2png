@@ -73,41 +73,7 @@ if mode == 'pyobjc':
             self.getURL(webview)
 
         def saveImages(self,bitmapdata,filename,options):
-            # save the fullsize png
-            if options.fullsize:
-                bitmapdata.representationUsingType_properties_(AppKit.NSPNGFileType,None).writeToFile_atomically_(filename + "-full.png",objc.YES)
-
-            if options.thumb or options.clipped:
-                # work out how big the thumbnail is
-                width = bitmapdata.pixelsWide()
-                height = bitmapdata.pixelsHigh()
-                thumbWidth = (width * options.scale)
-                thumbHeight = (height * options.scale)
-
-                # make the thumbnails in a scratch image
-                scratch = AppKit.NSImage.alloc().initWithSize_(
-                        Foundation.NSMakeSize(thumbWidth,thumbHeight))
-                scratch.lockFocus()
-                AppKit.NSGraphicsContext.currentContext().setImageInterpolation_(
-                        AppKit.NSImageInterpolationHigh)
-                thumbRect = Foundation.NSMakeRect(0.0, 0.0, thumbWidth, thumbHeight)
-                clipRect = Foundation.NSMakeRect(0.0, 
-                        thumbHeight-options.clipheight, 
-                        options.clipwidth, options.clipheight)
-                bitmapdata.drawInRect_(thumbRect)
-                thumbOutput = AppKit.NSBitmapImageRep.alloc().initWithFocusedViewRect_(thumbRect)
-                clipOutput = AppKit.NSBitmapImageRep.alloc().initWithFocusedViewRect_(clipRect)
-                scratch.unlockFocus()
-
-                # save the thumbnails as pngs 
-                if options.thumb:
-                    thumbOutput.representationUsingType_properties_(
-                            AppKit.NSPNGFileType,None
-                        ).writeToFile_atomically_(filename + "-thumb.png",objc.YES)
-                if options.clipped:
-                    clipOutput.representationUsingType_properties_(
-                            AppKit.NSPNGFileType,None
-                        ).writeToFile_atomically_(filename + "-clipped.png",objc.YES)
+            bitmapdata.representationUsingType_properties_(AppKit.NSPNGFileType,None).writeToFile_atomically_(filename + "-full.png",objc.YES)
 
         def getURL(self,webview):
             if self.urls:
@@ -216,18 +182,6 @@ if mode == 'pygtk':
       if self.options.fullsize:
         pixbuf.save(filename + "-full.png", "png")
       
-      if self.options.thumb or self.options.clipped:
-        thumbWidth = int(size[0] * self.options.scale)
-        thumbHeight = int(size[1] * self.options.scale)
-        
-        thumbbuf = pixbuf.scale_simple(thumbWidth, thumbHeight, gtk.gdk.INTERP_BILINEAR)
-        if self.options.thumb:
-          thumbbuf.save(filename + "-thumb.png", "png")
-          
-        if self.options.clipped:
-          clipbuf = thumbbuf.subpixbuf(0,thumbHeight-int(self.options.clipheight),int(self.options.clipwidth), int(self.options.clipheight))
-          clipbuf.save(filename + "-clip.png", "png")
-      
       gtk.main_quit()
       
       
@@ -285,8 +239,6 @@ examples:
          metavar="HEIGHT")
       cmdparser.add_option("-u", "--user-agent", type="string",default="Mozilla/5.0 (Macintosh; Intel Mac OS X 10_6_8) AppleWebKit/534.51.22 (KHTML, like Gecko) Version/5.1.1 Safari/534.51.22",
          help="user agent sent to server")
-      cmdparser.add_option("-s", "--scale",type="float",default=0.25,
-         help="scale factor for thumbnails (default: 0.25)")
       cmdparser.add_option("-m", "--md5", action="store_true",
          help="use md5 hash for filename (like del.icio.us)")
       cmdparser.add_option("-o", "--filename", type="string",default="",
@@ -315,8 +267,6 @@ examples:
           if len(args) != 1 or args[0] == "-":
             print "--filename option requires exactly one url"
             return
-      if options.scale == 0:
-        cmdparser.error("scale cannot be zero")
       # make sure we're outputing something
       if not (options.fullsize or options.thumb or options.clipped):
         options.fullsize = True
@@ -324,12 +274,8 @@ examples:
         options.clipped = True
       # work out the initial size of the browser window
       #  (this might need to be larger so clipped image is right size)
-      options.initWidth = (options.clipwidth / options.scale)
-      options.initHeight = (options.clipheight / options.scale)
-      if options.width>options.initWidth:
-         options.initWidth = options.width
-      if options.height>options.initHeight:
-         options.initHeight = options.height
+      options.initWidth = options.width
+      options.initHeight = options.height
 
   
       if mode == 'pyobjc':
