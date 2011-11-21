@@ -280,6 +280,7 @@ def main():
 examples:
 %prog http://www.google.com/                    # screengrab google
 %prog -W 1000 -H 1000 http://www.google.com/    # bigger screengrab of google
+%prog --useragent "My screen graber!"          # user agent sent, defaults to "...Safari/534.51.22..."
 %prog -T http://www.google.com/                 # just the thumbnail screengrab
 %prog -TF http://www.google.com/                # just thumbnail and fullsize grab
 %prog -o foo http://www.google.com/             # save images as "foo-thumb.png" etc
@@ -306,6 +307,8 @@ examples:
        help="use md5 hash for filename (like del.icio.us)")
     cmdparser.add_option("-o", "--filename", type="string",default="",
        metavar="NAME", help="save images as NAME.png,NAME-thumb.png etc")
+    cmdparser.add_option("-u", "--useragent", type="string",default="Mozilla/5.0 (Macintosh; Intel Mac OS X 10_6_8) AppleWebKit/534.51.22 (KHTML, like Gecko) Version/5.1.1 Safari/534.51.22",
+       help="user agent sent to server")
     cmdparser.add_option("-F", "--fullsize", action="store_true",
        help="only create fullsize screenshot")
     cmdparser.add_option("-T", "--thumb", action="store_true",
@@ -353,6 +356,7 @@ examples:
     # turn off scrolling so the content is actually x wide and not x-15
     webview.mainFrame().frameView().setAllowsScrolling_(objc.NO)
 
+    webview.setCustomUserAgent_(options.useragent)
     webview.setPreferencesIdentifier_('webkit2png')
     webview.preferences().setLoadsImagesAutomatically_(not options.noimages)
     webview._setZoomMultiplier_isTextOnly_(options.zoom, False)
