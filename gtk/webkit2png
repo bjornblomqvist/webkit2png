@@ -243,6 +243,7 @@ if mode == 'pygtk':
       
       settings = view.get_settings()
       settings.set_property("auto-load-images", not options.noimages)
+      settings.set_property("user-agent", options.user_agent)
       view.set_settings(settings)
       
       view.connect("load-finished", self._view_load_finished_cb)
@@ -281,6 +282,8 @@ examples:
       cmdparser.add_option("--clipheight",type="float",default=150.0,
          help="height of clipped thumbnail (default: 150)",
          metavar="HEIGHT")
+      cmdparser.add_option("-u", "--user-agent", type="string",default="Mozilla/5.0 (Macintosh; Intel Mac OS X 10_6_8) AppleWebKit/534.51.22 (KHTML, like Gecko) Version/5.1.1 Safari/534.51.22",
+         help="user agent sent to server")
       cmdparser.add_option("-s", "--scale",type="float",default=0.25,
          help="scale factor for thumbnails (default: 0.25)")
       cmdparser.add_option("-m", "--md5", action="store_true",
