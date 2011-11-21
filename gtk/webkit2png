@@ -231,12 +231,6 @@ examples:
          help="initial (and minimum) width of browser (default: 800)")
       cmdparser.add_option("-H", "--height",type="float",default=600.0,
          help="initial (and minimum) height of browser (default: 600)")
-      cmdparser.add_option("--clipwidth",type="float",default=200.0,
-         help="width of clipped thumbnail (default: 200)",
-         metavar="WIDTH")
-      cmdparser.add_option("--clipheight",type="float",default=150.0,
-         help="height of clipped thumbnail (default: 150)",
-         metavar="HEIGHT")
       cmdparser.add_option("-u", "--user-agent", type="string",default="Mozilla/5.0 (Macintosh; Intel Mac OS X 10_6_8) AppleWebKit/534.51.22 (KHTML, like Gecko) Version/5.1.1 Safari/534.51.22",
          help="user agent sent to server")
       cmdparser.add_option("-m", "--md5", action="store_true",
@@ -247,8 +241,6 @@ examples:
          help="only create fullsize screenshot")
       cmdparser.add_option("-T", "--thumb", action="store_true",
          help="only create thumbnail sreenshot")
-      cmdparser.add_option("-C", "--clipped", action="store_true",
-         help="only create clipped thumbnail screenshot")
       cmdparser.add_option("-d", "--datestamp", action="store_true",
          help="include date in filename")
       cmdparser.add_option("-D", "--dir",type="string",default="./",
@@ -267,13 +259,7 @@ examples:
           if len(args) != 1 or args[0] == "-":
             print "--filename option requires exactly one url"
             return
-      # make sure we're outputing something
-      if not (options.fullsize or options.thumb or options.clipped):
-        options.fullsize = True
-        options.thumb = True
-        options.clipped = True
       # work out the initial size of the browser window
-      #  (this might need to be larger so clipped image is right size)
       options.initWidth = options.width
       options.initHeight = options.height
 
