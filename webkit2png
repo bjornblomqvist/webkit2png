@@ -230,25 +230,20 @@ def main():
     usage = """%prog [options] [http://www.example.com/ ...]
 
 examples:
-%prog http://www.google.com/                    # screengrab google
-%prog -W 1000 -H 1000 http://www.google.com/    # bigger screengrab of google
-%prog --useragent "My screen graber!"          # user agent sent, defaults to "...Safari/534.51.22..."
-%prog -T http://www.google.com/                 # just the thumbnail screengrab
-%prog -TF http://www.google.com/                # just thumbnail and fullsize grab
-%prog -out=/tmp/bla.png http://www.google.com/  # save images as "/tmp/bl.png" etc
-%prog -                                         # screengrab urls from stdin
-%prog -h | less                                 # full documentation"""
+%prog --out=out.png --url=http://www.google.com/                    # screengrab google"""
 
     cmdparser = optparse.OptionParser(usage,version=("webkit2png "+__version__))
     # TODO: add quiet/verbose options
-    cmdparser.add_option("-W", "--width",type="float",default=800.0,
+    cmdparser.add_option("-W", "--min-width",type="float",dest='width',default=800.0,
        help="initial (and minimum) width of browser (default: 800)")
-    cmdparser.add_option("-H", "--height",type="float",default=600.0,
+    cmdparser.add_option("-H", "--min-height",dest='height',type="float",default=600.0,
        help="initial (and minimum) height of browser (default: 600)")
     cmdparser.add_option("-z", "--zoom",type="float",default=1.0,
        help="full page zoom of browser (default: 1.0)")
     cmdparser.add_option("-m", "--md5", action="store_true",
        help="use md5 hash for filename (like del.icio.us)")
+    cmdparser.add_option("-U", "--url", type="string",default="",
+       help="url to fetch")
     cmdparser.add_option("-o", "--out", type="string",default="",
       help="save images as NAME.png,NAME-thumb.png etc")
     cmdparser.add_option("-u", "--user-agent", type="string",default="Mozilla/5.0 (Macintosh; Intel Mac OS X 10_6_8) AppleWebKit/534.51.22 (KHTML, like Gecko) Version/5.1.1 Safari/534.51.22",
@@ -261,13 +256,19 @@ examples:
        help="don't load images")
     (options, args) = cmdparser.parse_args()
     
+    if options.url == "":
+      cmdparser.print_help()
+      print "You must supplie url to fetch"
+      return
+    
     if options.out == "" and options.md5 == None:
-      cmdparser.print_usage()
+      cmdparser.print_help()
       print "You must supplie a out file path or use the md5 option"
       return
       
-    if len(args) == 0:
-        cmdparser.print_usage()
+    if len(args) != 0:
+        cmdparser.print_help()
+        print "Unkown option!"
         return
 
     # Applying zooming to the viewport size
@@ -288,7 +289,7 @@ examples:
     # create a LoadDelegate
     delegate = WebkitLoad.alloc().init()
     delegate.options = options
-    delegate.urls = args
+    delegate.urls = [options.url]
     webview.setFrameLoadDelegate_(delegate)
 
     delegate.getURL(webview)
