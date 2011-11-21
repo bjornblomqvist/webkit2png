@@ -179,8 +179,8 @@ if mode == 'pygtk':
       
       pixbuf = gtk.gdk.Pixbuf(gtk.gdk.COLORSPACE_RGB, False, 8, size[0], size[1])
       pixbuf.get_from_drawable(pixmap, pixmap.get_colormap(),0,0,0,0,-1,-1)
-      if self.options.fullsize:
-        pixbuf.save(filename + "-full.png", "png")
+
+      pixbuf.save(filename, "png")
       
       gtk.main_quit()
       
@@ -205,7 +205,7 @@ if mode == 'pygtk':
       
       window.add(view)
       window.show_all()
-      view.open(args[0])
+      view.open(options.url)
       # go go go
       gtk.main()
     
@@ -217,34 +217,22 @@ def main():
       usage = """%prog [options] [http://example.net/ ...]
 
 examples:
-%prog http://google.com/            # screengrab google
-%prog -W 1000 -H 1000 http://google.com/ # bigger screengrab of google
-%prog -T http://google.com/         # just the thumbnail screengrab
-%prog -TF http://google.com/        # just thumbnail and fullsize grab
-%prog -o foo http://google.com/     # save images as "foo-thumb.png" etc
-%prog -                             # screengrab urls from stdin
-%prog -h | less                     # full documentation"""
+%prog http://google.com/            # screengrab google"""
 
       cmdparser = optparse.OptionParser(usage,version=("webkit2png "+__version__))
       # TODO: add quiet/verbose options
-      cmdparser.add_option("-W", "--width",type="float",default=800.0,
+      cmdparser.add_option("-W", "--min-width",type="float",dest='width',default=800.0,
          help="initial (and minimum) width of browser (default: 800)")
-      cmdparser.add_option("-H", "--height",type="float",default=600.0,
+      cmdparser.add_option("-H", "--min-height",dest='height',type="float",default=600.0,
          help="initial (and minimum) height of browser (default: 600)")
       cmdparser.add_option("-u", "--user-agent", type="string",default="Mozilla/5.0 (Macintosh; Intel Mac OS X 10_6_8) AppleWebKit/534.51.22 (KHTML, like Gecko) Version/5.1.1 Safari/534.51.22",
          help="user agent sent to server")
+      cmdparser.add_option("-U", "--url", type="string",default="",
+        help="url to fetch")
+      cmdparser.add_option("-o", "--out", type="string",default="",
+        help="save images as NAME.png,NAME-thumb.png etc")
       cmdparser.add_option("-m", "--md5", action="store_true",
          help="use md5 hash for filename (like del.icio.us)")
-      cmdparser.add_option("-o", "--filename", type="string",default="",
-         metavar="NAME", help="save images as NAME-full.png,NAME-thumb.png etc")
-      cmdparser.add_option("-F", "--fullsize", action="store_true",
-         help="only create fullsize screenshot")
-      cmdparser.add_option("-T", "--thumb", action="store_true",
-         help="only create thumbnail sreenshot")
-      cmdparser.add_option("-d", "--datestamp", action="store_true",
-         help="include date in filename")
-      cmdparser.add_option("-D", "--dir",type="string",default="./",
-         help="directory to place images into")
       cmdparser.add_option("--delay",type="int",default=0,
          help="delay between page load finishing and screenshot")
       cmdparser.add_option("--noimages", action="store_true",
@@ -252,13 +240,17 @@ examples:
       cmdparser.add_option("--debug", action="store_true",
          help=optparse.SUPPRESS_HELP)
       (options, args) = cmdparser.parse_args()
-      if len(args) == 0:
-          cmdparser.print_usage()
-          return
-      if options.filename:
-          if len(args) != 1 or args[0] == "-":
-            print "--filename option requires exactly one url"
-            return
+      
+      if options.url == "":
+        cmdparser.print_help()
+        print "You must supplie url to fetch"
+        return
+
+      if options.out == "" and options.md5 == None:
+        cmdparser.print_help()
+        print "You must supplie a out file path or use the md5 option"
+        return
+
       # work out the initial size of the browser window
       options.initWidth = options.width
       options.initHeight = options.height
@@ -271,26 +263,17 @@ examples:
 
 def makeFilename(URL,options):
    # make the filename
-   if options.filename:
-     filename = options.filename
-   elif options.md5:
+   if options.out:
+     filename = options.out
+   else:
      try:
             import md5
      except ImportError:
             print "--md5 requires python md5 library"
             AppKit.NSApplication.sharedApplication().terminate_(None)
      filename = md5.new(URL).hexdigest()
-   else:
-     import re
-     filename = re.sub('\W','',URL);
-     filename = re.sub('^http','',filename);
-   if options.datestamp:
-     import time
-     now = time.strftime("%Y%m%d")
-     filename = now + "-" + filename
-   import os
-   dir = os.path.abspath(os.path.expanduser(options.dir))
-   return os.path.join(dir,filename)
+     
+   return filename
 
       
 if __name__ == "__main__": main()
