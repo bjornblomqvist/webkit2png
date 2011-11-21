@@ -203,8 +203,8 @@ if mode == 'pygtk':
   
   class PyGTKBrowser:
     
-    def _view_load_finished_cb(self, view, web_frame):
-      
+    
+    def _do_time_out(self, view, web_frame):
       pixmap = view.get_snapshot(None)
       size = pixmap.get_size();
       
@@ -229,13 +229,14 @@ if mode == 'pygtk':
           clipbuf.save(filename + "-clip.png", "png")
       
       gtk.main_quit()
+      
+      
+    def _view_load_finished_cb(self, view, web_frame):
+      gobject.timeout_add(self.options.delay,self._do_time_out,view, web_frame)
     
     def __init__(self, options, args):
       self.options = options;
-      
-      if options.delay:
-        print "--delay is only supported on Mac OS X (for now). Sorry!"
-      
+
       gobject.threads_init()
       window = gtk.Window()
       window.resize(int(options.initWidth),int(options.initHeight))
@@ -300,7 +301,7 @@ examples:
          help="include date in filename")
       cmdparser.add_option("-D", "--dir",type="string",default="./",
          help="directory to place images into")
-      cmdparser.add_option("--delay",type="float",default=0,
+      cmdparser.add_option("--delay",type="int",default=0,
          help="delay between page load finishing and screenshot")
       cmdparser.add_option("--noimages", action="store_true",
          help="don't load images")
