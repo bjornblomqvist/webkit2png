@@ -1,7 +1,6 @@
 webkit2png is a command line tool that creates png screenshots of webpages.
 
-This version has changed to be a bit more like CutyCapt. I will be using it as a replacement for 
-CutyCapt.
+This version is ment to be a drop in replacement for CutyCapt.
 
 Want to help ? Fork it on github and send me a pull request!
 https://github.com/bjornblomqvist/webkit2png
