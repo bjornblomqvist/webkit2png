@@ -171,16 +171,19 @@ if mode == 'pygtk':
     
     
     def _do_time_out(self, view, web_frame):
-      pixmap = view.get_snapshot(None)
-      size = pixmap.get_size();
+      try:
+        pixmap = view.get_snapshot(None)
+        size = pixmap.get_size();
       
-      URL = view.get_main_frame().get_uri()
-      filename = makeFilename(URL, self.options)
+        URL = view.get_main_frame().get_uri()
+        filename = makeFilename(URL, self.options)
       
-      pixbuf = gtk.gdk.Pixbuf(gtk.gdk.COLORSPACE_RGB, False, 8, size[0], size[1])
-      pixbuf.get_from_drawable(pixmap, pixmap.get_colormap(),0,0,0,0,-1,-1)
+        pixbuf = gtk.gdk.Pixbuf(gtk.gdk.COLORSPACE_RGB, False, 8, size[0], size[1])
+        pixbuf.get_from_drawable(pixmap, pixmap.get_colormap(),0,0,0,0,-1,-1)
 
-      pixbuf.save(filename, "png")
+        pixbuf.save(filename, "png")
+      except:
+        print "Error during saving!"
       
       gtk.main_quit()
       
