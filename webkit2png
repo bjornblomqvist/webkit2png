@@ -251,10 +251,14 @@ examples:
     cmdparser.add_option("-X", "--xpath",type="string",default="",
        help="xpath for node to be captured")
     cmdparser.add_option("--delay",type="float",default=0,
-       help="delay between page load finishing and screenshot")
+       help="delay between page load finishing and screenshot in milisec")
     cmdparser.add_option("--noimages", action="store_true",
        help="don't load images")
     (options, args) = cmdparser.parse_args()
+    
+    # Deplay is changed to milisec
+    if options.delay:
+      options.delay = options.delay / 1000
     
     if options.url == "":
       cmdparser.print_help()
