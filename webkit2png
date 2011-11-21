@@ -58,9 +58,9 @@ class WebkitLoad (Foundation.NSObject, WebKit.protocols.WebFrameLoadDelegate):
 
     # make the filename
     def makeFilename(self,URL,options):
-        if options.filename:
-            filename = options.filename
-        elif options.md5:
+        if options.out:
+            filename = options.out
+        else:
             try:
                 from hashlib import md5
             except ImportError:
@@ -70,23 +70,11 @@ class WebkitLoad (Foundation.NSObject, WebKit.protocols.WebFrameLoadDelegate):
                 except ImportError:
                     print "--md5 requires python md5 library"
                     sys.exit(1)
-            filename = md5(URL).hexdigest()
-        else:
-            import re
-            filename = re.sub('\W','',URL);
-            filename = re.sub('^http','',filename);
-        if options.datestamp:
-            import time
-            now = time.strftime("%Y%m%d")
-            filename = now + "-" + filename
-        import os
-        dir = os.path.abspath(os.path.expanduser(options.dir))
-        if not os.path.exists(options.dir):
-            os.makedirs(dir)
-        return os.path.join(dir,filename)
+            filename = md5(URL).hexdigest()+".png"
+        return filename
 
     def saveImages(self,bitmapdata,filename,options,URL):
-        bitmapdata.representationUsingType_properties_(AppKit.NSPNGFileType,None).writeToFile_atomically_(filename+'.png',objc.YES)
+        bitmapdata.representationUsingType_properties_(AppKit.NSPNGFileType,None).writeToFile_atomically_(filename,objc.YES)
 
     def writeSource(self,filemame, url):
         if globals().get('xattr', False):
@@ -247,7 +235,7 @@ examples:
 %prog --useragent "My screen graber!"          # user agent sent, defaults to "...Safari/534.51.22..."
 %prog -T http://www.google.com/                 # just the thumbnail screengrab
 %prog -TF http://www.google.com/                # just thumbnail and fullsize grab
-%prog -o foo http://www.google.com/             # save images as "foo-thumb.png" etc
+%prog -out=/tmp/bla.png http://www.google.com/  # save images as "/tmp/bl.png" etc
 %prog -                                         # screengrab urls from stdin
 %prog -h | less                                 # full documentation"""
 
@@ -261,14 +249,10 @@ examples:
        help="full page zoom of browser (default: 1.0)")
     cmdparser.add_option("-m", "--md5", action="store_true",
        help="use md5 hash for filename (like del.icio.us)")
-    cmdparser.add_option("-o", "--filename", type="string",default="",
-       metavar="NAME", help="save images as NAME.png,NAME-thumb.png etc")
+    cmdparser.add_option("-o", "--out", type="string",default="",
+      help="save images as NAME.png,NAME-thumb.png etc")
     cmdparser.add_option("-u", "--user-agent", type="string",default="Mozilla/5.0 (Macintosh; Intel Mac OS X 10_6_8) AppleWebKit/534.51.22 (KHTML, like Gecko) Version/5.1.1 Safari/534.51.22",
        help="user agent sent to server")
-    cmdparser.add_option("-d", "--datestamp", action="store_true",
-       help="include date in filename")
-    cmdparser.add_option("-D", "--dir",type="string",default="./",
-       help="directory to place images into")
     cmdparser.add_option("-X", "--xpath",type="string",default="",
        help="xpath for node to be captured")
     cmdparser.add_option("--delay",type="float",default=0,
@@ -276,13 +260,15 @@ examples:
     cmdparser.add_option("--noimages", action="store_true",
        help="don't load images")
     (options, args) = cmdparser.parse_args()
+    
+    if options.out == "" and options.md5 == None:
+      cmdparser.print_usage()
+      print "You must supplie a out file path or use the md5 option"
+      return
+      
     if len(args) == 0:
         cmdparser.print_usage()
         return
-    if options.filename:
-        if len(args) != 1 or args[0] == "-":
-            print "--filename option requires exactly one url"
-            return
 
     # Applying zooming to the viewport size
     options.width *= options.zoom
